@@ -6,11 +6,13 @@ import { createContext, useEffect, useState } from "react";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: false,
+  setUser: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -29,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading: isLoading }}>
+    <AuthContext.Provider value={{ user, loading: isLoading, setUser }}>
       {children}
     </AuthContext.Provider>
   );

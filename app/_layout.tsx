@@ -9,6 +9,12 @@ const _layout = () => {
       <Stack
           screenOptions={{ headerShown: false}}
       >
+        <Stack.Screen
+          name="/profileModel"
+          options={{
+            presentation: "modal"
+          }}
+        />
 
       </Stack>
     </AuthProvider>
