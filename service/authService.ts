@@ -1,7 +1,8 @@
 import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile} from "firebase/auth"
 import { auth, db } from "./firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc , updateDoc} from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserType } from "@/types";
 
 export const login = async (email: string, password: string) => {
     return await signInWithEmailAndPassword(auth, email, password);
@@ -32,4 +33,21 @@ export const logout = async () => {
     // AsyncStorage.setItem("key", {});
     // AsyncStorage.getItem("key");
     return;
+}
+
+export const updateUser = async (uid: string, data: { name: string; image?: any }) => {
+    try {
+        const docRef = doc(db, "users", uid);
+        
+        // Firestore eke user data update kirima
+        await updateDoc(docRef, {
+            name: data.name,
+            image: data.image || null
+        });
+
+        return { success: true };
+    } catch (error: any) {
+        console.log("Error updating user: ", error);
+        return { success: false, msg: error.message };
+    }
 }
