@@ -17,7 +17,7 @@ const _layout = () => {
         tabBar={(props) => <CustomTabBar {...props} />}
         screenOptions={{
             headerShown: false,
-            sceneStyle: { backgroundColor: '#171717' }, // Neutral-900 hex code
+            // sceneStyle: { backgroundColor: '#171717' }, // Neutral-900 hex code
         }}
     >
         {tabs.map(({name, title, icon}: any) => (
