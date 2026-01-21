@@ -7,16 +7,27 @@ import { signOut } from 'firebase/auth'
 import { auth } from '@/service/firebaseConfig'
 import Loading from '@/components/Loading'
 import { useRouter } from 'expo-router'
+import { useAuth } from '@/hooks/useAuth'
+import { logout } from '@/service/authService'
 
 const Home = () => {
 
   const router = useRouter();
 
+  const {user} = useAuth();
+
+  if (!user) return <Text>Loading...</Text>;
+
+  console.log(user.displayName); // "Anjana heshan"
+  console.log(user.email); // "anjanaheshan676@gmail.com"
+  console.log(user.uid); // "7k6G1wJ4BxSfZg8eusOstgnTzS82"
+
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      // await signOut(auth);
+      await logout()
       console.log("User signed out successfully");
-      router.replace('/login');
+      router.replace('/welcome');
     } catch (error: any) {
       console.error("Logout Error: ", error.message);
     }
