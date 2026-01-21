@@ -1,5 +1,6 @@
+import { doc, getDoc } from "firebase/firestore";
+import { db, auth } from "@/service/firebaseConfig"; 
 import { useLoader } from "@/hooks/useLoader";
-import { auth } from "@/service/firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
 
@@ -22,8 +23,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     showLoader();
 
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsub = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        try {
+          const docRef = doc(db, "users", currentUser.uid);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            
+            setUser({
+              ...currentUser,
+              displayName: userData.name || currentUser.displayName,
+              photoURL: userData.image || currentUser.photoURL, 
+            } as any);
+          } else {
+            setUser(currentUser);
+          }
+        } catch (error) {
+          console.log("Error fetching user doc: ", error);
+          setUser(currentUser);
+        }
+      } else {
+        setUser(null);
+      }
       hideLoader();
     });
 

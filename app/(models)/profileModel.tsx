@@ -6,7 +6,7 @@ import ModelWrapper from '@/components/ModelWrapper'
 import Header from '@/components/Header'
 import BackButton from '@/components/BackButton'
 import { Image } from 'expo-image'
-import { getProfileImage } from '@/utils/imageUtile'
+import { getProfileImage, uploadFileToCloudinary } from '@/utils/imageUtile'
 import * as Icons from 'phosphor-react-native';
 import Typo from '@/components/Typo'
 import Input from '@/components/Input'
@@ -15,6 +15,7 @@ import Button from '@/components/Button'
 import { useAuth } from '@/hooks/useAuth'
 import { updateUser } from '@/utils/user'
 import { useRouter } from 'expo-router'
+import * as ImagePicker from 'expo-image-picker';
 
 const ProfileModel = () => {
     const { user, setUser } = useAuth();
@@ -31,10 +32,25 @@ const ProfileModel = () => {
             name: user?.displayName || "",
             image: user?.photoURL || null
         })
-    }, [user])
+    }, [user]);
+
+    const onPickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images', 'videos'],
+        // allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        });
+
+        console.log(result);
+
+        if (!result.canceled) {
+        setUserData({...userData , image: result.assets[0] });
+        }
+    }
 
     const onSubmit = async () => {
-        let { name } = userData;
+        let { name , image} = userData;
 
         if (!name.trim()) {
             Alert.alert("User", "Please fill all the fields");
@@ -42,22 +58,62 @@ const ProfileModel = () => {
         }
 
         setLoading(true);
-        const resp = await updateUser(user?.uid as string, userData);
-        setLoading(false);
 
-        if (resp.success) {
-            // Local state eka update kirima
-            if (setUser) {
-                setUser({
-                    ...user,
-                    displayName: userData.name,
-                    photoURL: userData.image
-                } as any);
+        try {
+            let finalImageUrl = image;
+
+            if (image && typeof image === 'object' && image.uri) {
+                const uploadResp = await uploadFileToCloudinary(image, "profiles");
+                if (uploadResp.success) {
+                    finalImageUrl = uploadResp.data;
+                } else {
+                    Alert.alert("Error", "Failed to upload image to cloud.");
+                    setLoading(false);
+                    return;
+                }
             }
-            router.back();
-        } else {
-            Alert.alert("User", resp.msg);
+            const resp = await updateUser(user?.uid as string, {
+                name,
+                image: finalImageUrl
+            });
+
+            if (resp.success) {
+                
+                if (setUser) {
+                    setUser({
+                        ...user,
+                        displayName: name,
+                        photoURL: finalImageUrl
+                    } as any);
+                }
+                router.back();
+            } else {
+                Alert.alert("User", resp.msg);
+            }
+        } catch (error) {
+            console.log("Update Error: ", error);
+            Alert.alert("User", "Something went wrong while updating profile.");
+        } finally {
+            setLoading(false);
         }
+
+        
+        // const resp = await updateUser(user?.uid as string, userData);
+        // setLoading(false);
+
+        // if (resp.success) {
+        //     // Local state eka update kirima
+        //     if (setUser) {
+        //         setUser({
+        //             ...user,
+        //             displayName: userData.name,
+        //             photoURL: userData.image
+        //         } as any);
+        //     }
+        //     router.back();
+        // } else {
+        //     Alert.alert("User", resp.msg);
+        // }
     };
 
     return (
@@ -92,7 +148,8 @@ const ProfileModel = () => {
                                 transition={100}
                             />
 
-                            <TouchableOpacity 
+                            <TouchableOpacity
+                                onPress={onPickImage}
                                 className="absolute bg-white rounded-full p-2 shadow-sm"
                                 style={{ 
                                     bottom: spacingY._5, 
