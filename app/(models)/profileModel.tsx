@@ -36,16 +36,16 @@ const ProfileModel = () => {
 
     const onPickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images', 'videos'],
-        // allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.5,
+            mediaTypes: ['images', 'videos'],
+            // allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.5,
         });
 
         console.log(result);
 
         if (!result.canceled) {
-        setUserData({...userData , image: result.assets[0] });
+            setUserData({...userData , image: result.assets[0] });
         }
     }
 
