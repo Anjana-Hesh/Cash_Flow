@@ -16,11 +16,16 @@ const _layout = () => {
           }}
         />
 
+        <Stack.Screen
+          name="/walletModel"
+          options={{
+            presentation: "modal"
+          }}
+        />
+
       </Stack>
     </AuthProvider>
   )
 }
 
 export default _layout
-
-const styles = StyleSheet.create({})
