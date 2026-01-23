@@ -14,7 +14,6 @@ import Loading from '@/components/Loading'
 import WalletListItem from '@/components/WalletListItem'
 
 const Wallet = () => {
-
   const router = useRouter();
   const {user} = useAuth();
 
@@ -23,24 +22,21 @@ const Wallet = () => {
     orderBy("created" , "desc")
   ]);
 
-  console.log("Wallts: ", wallets.length);
-
   const getTotalBalance = () =>
-    wallets.reduce((total, item) => {
-      total = total + (item.amount || 0);
-      return total;
-    }, 0)
+    wallets.reduce((total, item) => total + (item.amount || 0), 0);
 
   return (
     <ScreenWrapper style={{backgroundColor: colors.black}}>
-      <View style={styles.container}>
+      {/* Tailwind classes me wage standard View walata witharak danna */}
+      <View className="flex-1 justify-between">
+        
         {/* balance view */}
-        <View style={styles.balanceView}>
-          <View style={{alignItems: "center"}}>
-            <Typo
-              size={45}
-              fontWeight={"500"}
-            > 
+        <View 
+          style={{ height: verticalScale(200) }}
+          className="justify-center items-center"
+        >
+          <View className="items-center">
+            <Typo size={45} fontWeight={"500"}> 
               RS: {getTotalBalance()?.toFixed(2)}
             </Typo>
             <Typo size={16} color={colors.neutral300}>
@@ -49,10 +45,16 @@ const Wallet = () => {
           </View>
         </View>
 
-        {/* Wallets */}
-        <View style={styles.wallets}>
+        {/* Wallets Container */}
+        <View 
+            className="flex-1 bg-neutral-900 px-5 pt-6"
+            style={{ 
+                borderTopLeftRadius: radius._30, 
+                borderTopRightRadius: radius._30 
+            }}
+        >
           {/* header */}
-          <View style={styles.flexRow}>
+          <View className="flex-row justify-between items-center mb-3">
               <Typo size={20} fontWeight={"500"}> My Wallets </Typo>
               <TouchableOpacity onPress={() => router.push("/walletModel")}>
                 <Icons.PlusCircle
@@ -63,16 +65,16 @@ const Wallet = () => {
               </TouchableOpacity>
           </View>
 
-          {/* Todo: Wallet list */}
           {loading && <Loading/>}
+          
           <FlatList 
             data={wallets}
-            renderItem={({item, index}) => {
-              return <WalletListItem item={item} index={index} router={router} />
-            }}
-            contentContainerStyle = {styles.listStyle}
+            renderItem={({item, index}) => (
+              <WalletListItem item={item} index={index} router={router} />
+            )}
+            contentContainerStyle={{ paddingVertical: 25 }}
+            showsVerticalScrollIndicator={false}
           />
-
         </View>
       </View>
     </ScreenWrapper>
@@ -80,35 +82,3 @@ const Wallet = () => {
 }
 
 export default Wallet
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "space-between"
-  },
-  balanceView: {
-    height: verticalScale(200),
-    backgroundColor: colors.black,
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  flexRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacingY._10,
-  },
-  wallets: {
-    flex: 1,
-    backgroundColor:colors.neutral900,
-    borderTopRightRadius: radius._30,
-
-    borderTopLeftRadius: radius._30,
-    padding: spacingX._20,
-    paddingTop: spacingX._25
-  },
-  listStyle: {
-    paddingVertical: spacingY._25,
-    paddingTop: spacingY._15
-  }
-})
