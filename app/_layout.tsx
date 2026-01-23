@@ -23,6 +23,13 @@ const _layout = () => {
           }}
         />
 
+        <Stack.Screen
+          name="/transactionModel"
+          options={{
+            presentation: "modal"
+          }}
+        />
+
       </Stack>
     </AuthProvider>
   )
