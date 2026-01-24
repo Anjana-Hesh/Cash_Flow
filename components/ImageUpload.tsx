@@ -9,6 +9,9 @@ import { Image } from 'expo-image';
 import { getFilePath } from '@/utils/imageUtile';
 import * as ImagePicker from 'expo-image-picker';
 
+
+//  if i use tailwind image can not see 
+
 const ImageUpload = ({
     file = null,
     onSelect,
