@@ -129,8 +129,8 @@ const Home = () => {
     { id: '1', walletId: 'wallet123', amount: 2500, category: 'food', type: 'expense', date: '12 Jan', description: 'Dinner' },
     { id: '2', walletId: 'wallet123', amount: 50000, category: 'salary', type: 'income', date: '10 Jan', description: 'Monthly Salary' },
     { id: '3', walletId: 'wallet123', amount: 1200, category: 'shopping', type: 'expense', date: '08 Jan', description: 'Grocery' },
-    { id: '4', walletId: 'wallet123', amount: 800, category: 'utilities', type: 'expense', date: '05 Jan', description: 'Electricity' },
-    { id: '5', walletId: 'wallet123', amount: 9200, category: 'utilities', type: 'expense', date: '15 Jan', description: 'Gooods' },
+    { id: '4', walletId: 'wallet123', amount: 800, category: 'rent', type: 'expense', date: '05 Jan', description: 'Electricity' },
+    { id: '5', walletId: 'wallet123', amount: 9200, category: 'groceries', type: 'expense', date: '15 Jan', description: 'Gooods' },
   ];
 
   if (!user) return (
