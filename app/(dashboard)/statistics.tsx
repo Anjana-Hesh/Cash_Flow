@@ -3,7 +3,7 @@ import React from 'react'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import Typo from '@/components/Typo'
 import Header from '@/components/Header'
-import { colors, spacingX, spacingY } from '@/constants/theme'
+import { colors} from '@/constants/theme'
 import { LineChart, PieChart } from "react-native-chart-kit";
 
 const screenWidth = Dimensions.get("window").width;
@@ -11,10 +11,10 @@ const screenWidth = Dimensions.get("window").width;
 const Statistics = () => {
 
     const lineData = {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul" , "Aug" , "Sep", "Oct", "Nov", "Dec"],
         datasets: [
             {
-                data: [20, 45, 28, 80, 99, 43],
+                data: [20, 45, 28, 80, 99, 43 , 25, 67, 89, 90, 100, 120],
                 color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // Line color
                 strokeWidth: 2 
             }
@@ -31,11 +31,11 @@ const Statistics = () => {
     const chartConfig = {
         backgroundGradientFrom: colors.neutral800,
         backgroundGradientTo: colors.neutral900,
-        decimalPlaces: 0,
+        decimalPlaces: 1,
         color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
         labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
         style: { borderRadius: 16 },
-        propsForDots: { r: "6", strokeWidth: "2", stroke: "#ffa726" }
+        propsForDots: { r: "6", strokeWidth: "2", stroke: "#ffa726" }  // line chart dot style
     };
 
     return (

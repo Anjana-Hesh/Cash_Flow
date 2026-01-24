@@ -6,7 +6,7 @@ import { colors, radius, spacingX, spacingY } from '@/constants/theme'
 import Typo from './Typo'
 import {FlashList} from '@shopify/flash-list'
 import Loading from './Loading'
-import { expenseCategories } from '@/constants/data'
+import { expenseCategories, incomeCategory } from '@/constants/data'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 
 const TransactionList = ({
@@ -16,8 +16,9 @@ const TransactionList = ({
     emptyListMessage
 }: TransactionListType) => {
 
-    const handleClick = () => {
-// Open transaction details
+    const handleClick = (item: any) => {
+        // Open transaction details
+        console.log("Transaction Clicked: ", item);
     }
 
     return (
@@ -66,7 +67,11 @@ const TransactionItem = ({
     index, 
     handleClick
 }: TransactionItemProps) => {
-    let category = expenseCategories["utilities"]
+    // let category = expenseCategories["utilities"]
+     const isIncome = item.type === 'income';
+    const category = isIncome 
+        ? incomeCategory
+        : expenseCategories[item.category as keyof typeof expenseCategories] || expenseCategories.others;
     const IconComponent = category.icon
 
     return (
@@ -89,15 +94,17 @@ const TransactionItem = ({
 
                 <View style={styles.categoryDes}>
                     <Typo size={17}> {category.label} </Typo>
-                    <Typo size={12} color={colors.neutral400} textProps={{numberOfLines: 1}}> Paid </Typo>
+                    <Typo size={12} color={colors.neutral400} textProps={{numberOfLines: 1}}> {item.description || "No description"} </Typo>
                 </View>
 
                 <View style={styles.amoundDate}>
-                    <Typo fontWeight={"500"} color={colors.rose}>
-                        - RS: 25
+                    <Typo fontWeight={"500"} color={isIncome ? colors.primary : colors.rose}>
+                        {/* - RS: 25 */}
+                        {isIncome ? '+ ' : '- '} RS: {item.amount}
                     </Typo>
                     <Typo size={13} color={colors.neutral400}>
-                        12 Jan
+                        {/* 12 Jan */}
+                        {item.date}
                     </Typo>
                 </View>
             </TouchableOpacity>

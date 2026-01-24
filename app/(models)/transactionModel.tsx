@@ -44,7 +44,7 @@ const TransactionModel = () => {
     };
 
     const onDateChange = (event: any, selectedDate?: Date) => {
-        setShowDatePicker(Platform.OS === 'ios'); // iOS වලදී දිගටම පෙන්වයි
+        setShowDatePicker(Platform.OS === 'ios');
         if (selectedDate) {
             setTransaction({ ...transaction, date: selectedDate });
         }
