@@ -28,11 +28,13 @@ const Profile = () => {
     {
       title: "Settings",
       icon: <Icons.GearSix size={26} color={colors.white} weight="fill" />,
+      routeName: '/settingsModel',
       bgColor: "#059669"
     },
     {
       title: "Privacy Policy",
       icon: <Icons.Lock size={26} color={colors.white} weight="fill" />,
+      routeName: '/privacyPolicy',
       bgColor: colors.neutral600
     },
     {

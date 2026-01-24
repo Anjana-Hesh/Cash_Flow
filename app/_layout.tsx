@@ -30,6 +30,20 @@ const _layout = () => {
           }}
         />
 
+        <Stack.Screen
+          name="/privacyPolicy"
+          options={{
+            presentation: "modal"
+          }}
+        />
+
+        <Stack.Screen
+          name="/settingsModel"
+          options={{
+            presentation: "modal"
+          }}
+        />
+
       </Stack>
     </AuthProvider>
   )
