@@ -1,6 +1,6 @@
 import { ResponseType, WalletType } from "@/types";
 import { uploadFileToCloudinary } from "./imageUtile";
-import { collection, deleteDoc, doc, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, increment, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/service/firebaseConfig";
 
 export const createOrUpdateWallet = async (
@@ -54,3 +54,20 @@ export const deleteWallet = async (walletId: string): Promise<ResponseType> => {
         return {success: false, msg: error.message}
     }
 }
+
+export const updateWalletBalance = async (walletId: string, amount: number, type: string) => {
+    try {
+        const walletRef = doc(db, "wallets", walletId);
+       
+        const change = type === 'income' ? amount : -amount;
+
+        await updateDoc(walletRef, {
+            amount: increment(change)
+        });
+        
+        return { success: true };
+    } catch (error: any) {
+        console.error("Wallet Balance Update Error: ", error);
+        return { success: false, msg: error.message };
+    }
+};

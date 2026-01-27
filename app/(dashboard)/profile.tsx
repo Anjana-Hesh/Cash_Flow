@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Alert, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import Typo from '@/components/Typo'
@@ -21,25 +21,25 @@ const Profile = () => {
   const accountOptions: accountOptionType[] = [
     {
       title: "Edit Profile",
-      icon: <Icons.User size={26} color={colors.white} weight="fill" />,
+      icon: <Icons.UserIcon size={26} color={colors.white} weight="fill" />,
       routeName: '/profileModel',
       bgColor: "#6366f1"
     },
     {
       title: "Settings",
-      icon: <Icons.GearSix size={26} color={colors.white} weight="fill" />,
+      icon: <Icons.GearSixIcon size={26} color={colors.white} weight="fill" />,
       routeName: '/settingsModel',
       bgColor: "#059669"
     },
     {
       title: "Privacy Policy",
-      icon: <Icons.Lock size={26} color={colors.white} weight="fill" />,
+      icon: <Icons.LockIcon size={26} color={colors.white} weight="fill" />,
       routeName: '/privacyPolicy',
       bgColor: colors.neutral600
     },
     {
       title: "Logout",
-      icon: <Icons.Power size={26} color={colors.white} weight="fill" />,
+      icon: <Icons.PowerIcon size={26} color={colors.white} weight="fill" />,
       bgColor: "#e11d48"
     }
   ]
@@ -135,7 +135,7 @@ const Profile = () => {
                 </View>
 
                 {/* Arrow Icon */}
-                <Icons.CaretRight 
+                <Icons.CaretRightIcon 
                   size={verticalScale(20)}
                   weight='bold'
                   color={colors.neutral400}
