@@ -19,25 +19,21 @@ const ImagePickerModal = ({ visible, onClose, onSelect }: ImagePickerModalProps)
             visible={visible}
             onRequestClose={onClose}
         >
-            {/* Backdrop: Darkens the background when modal is open */}
+        
             <Pressable 
                 className="flex-1 bg-black/50 justify-end" 
                 onPress={onClose}
             >
-                {/* Modal Content Container */}
+            
                 <View className="bg-neutral-800 rounded-t-[30px] p-6 pb-10 items-center">
-                    
-                    {/* Decorative Handle Bar at the top of sheet */}
                     <View className="w-10 h-1.5 bg-neutral-500 rounded-full mb-5" />
 
                     <Typo size={18} fontWeight="700" style={{marginBottom: 8}}>
                         Select Profile Photo
                     </Typo>
 
-                    {/* Options Row */}
                     <View className="flex-row w-full justify-evenly">
-                        
-                        {/* Camera Option */}
+
                         <TouchableOpacity 
                             className="items-center gap-3"
                             onPress={() => { onSelect('camera'); onClose(); }}
@@ -48,7 +44,6 @@ const ImagePickerModal = ({ visible, onClose, onSelect }: ImagePickerModalProps)
                             <Typo size={14} fontWeight="600">Camera</Typo>
                         </TouchableOpacity>
 
-                        {/* Gallery Option */}
                         <TouchableOpacity 
                             className="items-center gap-3"
                             onPress={() => { onSelect('gallery'); onClose(); }}
@@ -61,7 +56,6 @@ const ImagePickerModal = ({ visible, onClose, onSelect }: ImagePickerModalProps)
 
                     </View>
 
-                    {/* Cancel Button */}
                     <TouchableOpacity 
                         onPress={onClose}
                         className="mt-8 w-full py-3 bg-neutral-700 rounded-xl items-center"
