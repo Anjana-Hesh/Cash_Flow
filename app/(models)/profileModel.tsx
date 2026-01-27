@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { updateUser } from '@/utils/user'
 import { useRouter } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker';
+import ImagePickerModal from '@/components/ImagePickerModal'
 
 const ProfileModel = () => {
     const { user, setUser } = useAuth();
@@ -34,20 +35,55 @@ const ProfileModel = () => {
         })
     }, [user]);
 
-    const onPickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images', 'videos'],
-            // allowsEditing: true,
-            aspect: [4, 3],
-            quality: 0.5,
-        });
+    // const onPickImage = async () => {
 
-        console.log(result);
+    //     Alert.alert(
+    //         "Profile Picture",
+    //         "Choose an option",
+    //         [
+    //             {
+    //                 text: "Camera",
+    //                 onPress: () => handleImageCapture('camera'),
+    //             },
+    //             {
+    //                 text: "Gallery",
+    //                 onPress: () => handleImageCapture('gallery'),
+    //             },
+    //             {
+    //                 text: "Cancel",
+    //                 style: "cancel",
+    //             },
+    //         ]
+    //     );
+    // };
+
+    const handleImageCapture = async (mode: 'camera' | 'gallery') => {
+        let result;
+        
+        const options: ImagePicker.ImagePickerOptions = {
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+        };
+
+        if (mode === 'camera') {
+            
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert("Permission Denied", "Sorry, we need camera permissions to make this work!");
+                return;
+            }
+            result = await ImagePicker.launchCameraAsync(options);
+        } else {
+            
+            result = await ImagePicker.launchImageLibraryAsync(options);
+        }
 
         if (!result.canceled) {
-            setUserData({...userData , image: result.assets[0] });
+            setUserData({ ...userData, image: result.assets[0] });
         }
-    }
+    };
 
     const onSubmit = async () => {
         let { name , image} = userData;
@@ -116,6 +152,8 @@ const ProfileModel = () => {
         // }
     };
 
+    const [showModal, setShowModal] = useState(false);
+
     return (
         <ModelWrapper>
             {/* Main Container */}
@@ -149,7 +187,7 @@ const ProfileModel = () => {
                             />
 
                             <TouchableOpacity
-                                onPress={onPickImage}
+                                onPress={() => setShowModal(true)}
                                 className="absolute bg-white rounded-full p-2 shadow-sm"
                                 style={{ 
                                     bottom: spacingY._5, 
@@ -161,12 +199,18 @@ const ProfileModel = () => {
                                     shadowRadius: 10,
                                 }}
                             >
-                                <Icons.Pencil
+                                <Icons.PencilIcon
                                     size={verticalScale(20)}
                                     color={colors.neutral800}
                                 />
                             </TouchableOpacity>
                         </View>
+
+                        <ImagePickerModal 
+                            visible={showModal} 
+                            onClose={() => setShowModal(false)} 
+                            onSelect={handleImageCapture}
+                        />
 
                         {/* Name Input */}
                         <View className="space-y-2">
