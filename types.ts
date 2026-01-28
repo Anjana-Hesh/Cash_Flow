@@ -95,6 +95,7 @@ export type TransactionListType = {
   title?: string;
   loading?: boolean;
   emptyListMessage?: string;
+  onItemPress?: (item: TransactionType) => void;
 };
 
 export type TransactionItemProps = {

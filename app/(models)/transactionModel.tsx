@@ -1,5 +1,5 @@
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View, Platform } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { colors, spacingY } from '@/constants/theme'
 import { verticalScale } from '@/utils/styling'
 import ModelWrapper from '@/components/ModelWrapper'
@@ -26,7 +26,8 @@ const TransactionModel = () => {
     const router = useRouter();
     const oldTransaction: any = useLocalSearchParams();
 
-    const categories = Object.values(expenseCategories);
+    // 1. Categories useMemo Controlled with UseMemo (Avoid Infinite loop , hight perfomances)
+    const categories = useMemo(() => Object.values(expenseCategories), []);
     
     const [loading, setLoading] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -47,6 +48,7 @@ const TransactionModel = () => {
         { label: 'Income', value: 'income' },
     ];
 
+    // Wallets Fetching
     useEffect(() => {
         if (!user?.uid) return;
 
@@ -62,6 +64,7 @@ const TransactionModel = () => {
         return () => unsubscribe();
     }, [user?.uid]);
 
+    // 2. Old Transaction Test (id only used as The dependency)
     useEffect(() => {
         if (oldTransaction?.id) {
             setTransaction({
@@ -69,16 +72,16 @@ const TransactionModel = () => {
                 amount: Number(oldTransaction.amount),
                 description: oldTransaction.description || "",
                 category: oldTransaction.category || "",
-                date: new Date(oldTransaction.date),
+                // String Date convert to a Object
+                date: oldTransaction.date ? new Date(oldTransaction.date) : new Date(),
                 walletId: oldTransaction.walletId,
                 image: oldTransaction.image || null,
             });
         }
-    }, [oldTransaction]);
+    }, [oldTransaction?.id]); // Chnage the object only with id , at that time stop the loop
 
     const onSubmit = async () => {
         const { type, amount, description, category, date, walletId, image } = transaction;
-
         const finalCategory = type === 'income' ? 'income' : category;
 
         if (!amount || amount <= 0 || !walletId || !finalCategory) {
@@ -102,7 +105,7 @@ const TransactionModel = () => {
                 type,
                 amount: Number(amount),
                 description: description?.trim(),
-                category,
+                category: finalCategory,
                 date: Timestamp.fromDate(new Date(date as any)),
                 walletId,
                 image: finalImageUrl,
@@ -111,15 +114,16 @@ const TransactionModel = () => {
             };
 
             if (oldTransaction?.id) {
+                // Update Logic
                 await updateDoc(doc(db, "transactions", oldTransaction.id), transactionData);
             } else {
+                // Add New Logic
                 await addDoc(collection(db, "transactions"), {
                     ...transactionData,
                     createdAt: Timestamp.now()
                 });
 
                 const res = await updateWalletBalance(walletId, Number(amount), type);
-
                 if (!res.success) {
                     console.warn("Wallet update failed but transaction was saved.");
                 }
@@ -135,7 +139,7 @@ const TransactionModel = () => {
 
     const onDateChange = (event: any, selectedDate?: Date) => {
         setShowDatePicker(Platform.OS === 'ios');
-        if (selectedDate) setTransaction({ ...transaction, date: selectedDate });
+        if (selectedDate) setTransaction(prev => ({ ...prev, date: selectedDate }));
     };
 
     return (
@@ -163,7 +167,7 @@ const TransactionModel = () => {
                                 labelField="label"
                                 valueField="value"
                                 value={transaction.type}
-                                onChange={item => setTransaction({...transaction, type: item.value as any})}
+                                onChange={item => setTransaction(prev => ({...prev, type: item.value as any}))}
                             />
                         </View>
 
@@ -182,7 +186,7 @@ const TransactionModel = () => {
                                 valueField="id"
                                 placeholder="Choose Wallet"
                                 value={transaction.walletId}
-                                onChange={item => setTransaction({...transaction, walletId: item.id as string})}
+                                onChange={item => setTransaction(prev => ({...prev, walletId: item.id as string}))}
                             />
                         </View>
 
@@ -193,21 +197,11 @@ const TransactionModel = () => {
                                 placeholder="0.00"
                                 keyboardType="numeric"
                                 value={transaction.amount.toString()}
-                                onChangeText={(val) => setTransaction({...transaction, amount: Number(val)})}
+                                onChangeText={(val) => setTransaction(prev => ({...prev, amount: Number(val)}))}
                             />
                         </View>
 
-                        {/* Category typo */}
-                        {/* <View className="gap-y-2">
-                            <Typo color={colors.neutral200} size={16}>Category</Typo>
-                            <Input
-                                placeholder="e.g. Food, Rent, Salary"
-                                value={transaction.category}
-                                onChangeText={(val) => setTransaction({...transaction, category: val})}
-                            />
-                        </View> */}
-
-                        {/* Category Selector (Dropdown for Expense, Static for Income) */}
+                        {/* Category Selector */}
                         <View className="gap-y-2">
                             <Typo color={colors.neutral200} size={16}>Category</Typo>
                             {transaction.type === 'expense' ? (
@@ -223,7 +217,7 @@ const TransactionModel = () => {
                                     valueField="value"
                                     placeholder="Select Category"
                                     value={transaction.category}
-                                    onChange={item => setTransaction({...transaction, category: item.value})}
+                                    onChange={item => setTransaction(prev => ({...prev, category: item.value}))}
                                 />
                             ) : (
                                 <Input
@@ -238,7 +232,7 @@ const TransactionModel = () => {
                         <View className="gap-y-2">
                             <Typo color={colors.neutral200} size={16}>Date</Typo>
                             <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePicker}>
-                                <Icons.CalendarBlankIcon size={20} color={colors.neutral200} />
+                                <Icons.CalendarBlank size={20} color={colors.neutral200} />
                                 <Typo color={colors.neutral100} style={{ marginLeft: 10 }}>
                                     {(transaction.date as Date).toDateString()}
                                 </Typo>
@@ -261,7 +255,7 @@ const TransactionModel = () => {
                                 multiline
                                 containerStyle={{ minHeight: verticalScale(80), alignItems: 'flex-start' }}
                                 value={transaction.description}
-                                onChangeText={(val) => setTransaction({...transaction, description: val})}
+                                onChangeText={(val) => setTransaction(prev => ({...prev, description: val}))}
                             />
                         </View>
 
@@ -270,8 +264,8 @@ const TransactionModel = () => {
                             <Typo color={colors.neutral200} size={16}>Receipt Image</Typo>
                             <ImageUpload
                                 file={transaction.image}
-                                onClear={() => setTransaction({...transaction, image: null})}
-                                onSelect={file => setTransaction({...transaction, image: file})} 
+                                onClear={() => setTransaction(prev => ({...prev, image: null}))}
+                                onSelect={file => setTransaction(prev => ({...prev, image: file}))} 
                                 placeholder='Upload Receipt' 
                             />
                         </View>

@@ -13,12 +13,13 @@ const TransactionList = ({
     data,
     title,
     loading,
-    emptyListMessage
+    emptyListMessage,
+    onItemPress
 }: TransactionListType) => {
 
-    const handleClick = (item: any) => {
-        console.log("Transaction Clicked: ", item);
-    }
+    // const handleClick = (item: any) => {
+    //     console.log("Transaction Clicked: ", item);
+    // }
 
     return (
         <View className="gap-y-4">
@@ -31,10 +32,15 @@ const TransactionList = ({
                 <FlashList 
                     data={data}
                     renderItem={({item, index}) => (
-                        <TransactionItem item={item} index={index} handleClick={handleClick} />
+                        <TransactionItem 
+                            item={item} 
+                            index={index} 
+                            handleClick={() => onItemPress && onItemPress(item)}
+
+                        />
                     )}
-                    
-                    // estimatedItemSize={70}
+                    // @ts-ignore
+                    estimatedItemSize={70}
                 />
             </View>
 
