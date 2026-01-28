@@ -19,11 +19,14 @@ import { uploadFileToCloudinary } from '@/utils/imageUtile'
 import { addDoc, collection, doc, Timestamp, updateDoc, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/service/firebaseConfig'
 import { updateWalletBalance } from '@/utils/walletUtil'
+import { expenseCategories } from '@/constants/data'
 
 const TransactionModel = () => {
     const { user } = useAuth();
     const router = useRouter();
     const oldTransaction: any = useLocalSearchParams();
+
+    const categories = Object.values(expenseCategories);
     
     const [loading, setLoading] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -76,7 +79,9 @@ const TransactionModel = () => {
     const onSubmit = async () => {
         const { type, amount, description, category, date, walletId, image } = transaction;
 
-        if (!amount || amount <= 0 || !walletId || !category) {
+        const finalCategory = type === 'income' ? 'income' : category;
+
+        if (!amount || amount <= 0 || !walletId || !finalCategory) {
             Alert.alert("Missing Information", "Please enter amount, category and select a wallet.");
             return;
         }
@@ -162,6 +167,7 @@ const TransactionModel = () => {
                             />
                         </View>
 
+                        {/* Wallet Dropdown */}
                         <View className="gap-y-2">
                             <Typo color={colors.neutral200} size={16}>Select Wallet</Typo>
                             <Dropdown
@@ -191,20 +197,48 @@ const TransactionModel = () => {
                             />
                         </View>
 
-                        <View className="gap-y-2">
+                        {/* Category typo */}
+                        {/* <View className="gap-y-2">
                             <Typo color={colors.neutral200} size={16}>Category</Typo>
                             <Input
                                 placeholder="e.g. Food, Rent, Salary"
                                 value={transaction.category}
                                 onChangeText={(val) => setTransaction({...transaction, category: val})}
                             />
+                        </View> */}
+
+                        {/* Category Selector (Dropdown for Expense, Static for Income) */}
+                        <View className="gap-y-2">
+                            <Typo color={colors.neutral200} size={16}>Category</Typo>
+                            {transaction.type === 'expense' ? (
+                                <Dropdown
+                                    style={[styles.dropdown, { borderColor: colors.neutral500 }]}
+                                    placeholderStyle={styles.placeholderStyle}
+                                    selectedTextStyle={styles.selectedTextStyle}
+                                    containerStyle={styles.dropdownContainer}
+                                    itemTextStyle={styles.itemText}
+                                    activeColor={colors.neutral700}
+                                    data={categories}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder="Select Category"
+                                    value={transaction.category}
+                                    onChange={item => setTransaction({...transaction, category: item.value})}
+                                />
+                            ) : (
+                                <Input
+                                    value="Income"
+                                    editable={false}
+                                    containerStyle={{ backgroundColor: colors.neutral800, opacity: 0.6 }}
+                                />
+                            )}
                         </View>
 
                         {/* Date Picker */}
                         <View className="gap-y-2">
                             <Typo color={colors.neutral200} size={16}>Date</Typo>
                             <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePicker}>
-                                <Icons.CalendarBlank size={20} color={colors.neutral200} />
+                                <Icons.CalendarBlankIcon size={20} color={colors.neutral200} />
                                 <Typo color={colors.neutral100} style={{ marginLeft: 10 }}>
                                     {(transaction.date as Date).toDateString()}
                                 </Typo>
