@@ -40,5 +40,3 @@ const useFetchData = <T> (
 }
 
 export default useFetchData
-
-const styles = StyleSheet.create({})
