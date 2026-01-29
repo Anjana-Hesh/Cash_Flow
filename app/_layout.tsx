@@ -9,36 +9,43 @@ const _layout = () => {
       <Stack
           screenOptions={{ headerShown: false}}
       >
+
+        <Stack.Screen name="index" /> 
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(dashboard)" />
+
         <Stack.Screen
-          name="/profileModel"
+          name="(models)/walletModel"
           options={{
             presentation: "modal"
           }}
         />
 
         <Stack.Screen
-          name="/walletModel"
+          name="(models)/profileModel"
+          options={{
+            presentation: "modal"
+          }}
+        />
+
+        
+
+        <Stack.Screen
+          name="(models)/transactionModel"
           options={{
             presentation: "modal"
           }}
         />
 
         <Stack.Screen
-          name="/transactionModel"
+          name="(models)/privacyPolicy"
           options={{
             presentation: "modal"
           }}
         />
 
         <Stack.Screen
-          name="/privacyPolicy"
-          options={{
-            presentation: "modal"
-          }}
-        />
-
-        <Stack.Screen
-          name="/settingsModel"
+          name="(models)/settingsModel"
           options={{
             presentation: "modal"
           }}

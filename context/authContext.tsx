@@ -19,11 +19,13 @@ export const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { hideLoader, isLoading, showLoader } = useLoader();
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    showLoader();
+    // showLoader();
 
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
+      setLoading(true);
       if (currentUser) {
         try {
           const docRef = doc(db, "users", currentUser.uid);
@@ -47,14 +49,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setUser(null);
       }
-      hideLoader();
+      // hideLoader();
+      setLoading(false);
     });
 
     return () => unsub();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading: isLoading, setUser }}>
+    <AuthContext.Provider value={{ user, loading , setUser }}>
       {children}
     </AuthContext.Provider>
   );
