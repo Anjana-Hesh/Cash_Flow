@@ -1,9 +1,9 @@
-import { ScrollView, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useMemo, useState } from 'react'
+import { BackHandler, ScrollView, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useMemo, useState } from 'react'
 import Button from '@/components/Button'
 import Typo from '@/components/Typo'
 import { colors, spacingX, spacingY } from '@/constants/theme'
-import { useRouter } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { verticalScale } from '@/utils/styling'
@@ -21,6 +21,28 @@ const Home = () => {
   // Search state
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (isSearching) {
+          // Search bar eka open nam eka close karanawa
+          setIsSearching(false);
+          setSearchQuery('');
+          return true; // App eka close wenne na
+        }
+        // Search eke natham App eken exit wenawa (Welcome ekata yanne na)
+        BackHandler.exitApp();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => {
+        subscription.remove();
+      }
+    }, [isSearching])
+  );
 
   // const dummyTransactions = [
   //   { id: '1', walletId: 'wallet123', amount: 2500, category: 'food', type: 'expense', date: '12 Jan', description: 'Dinner' },

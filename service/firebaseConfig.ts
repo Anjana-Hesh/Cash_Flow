@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app";
 // @ts-ignore
-import { initializeAuth , getReactNativePersistence} from "firebase/auth";
+import { initializeAuth , getReactNativePersistence, getAuth} from "firebase/auth";
 import {getFirestore} from "firebase/firestore";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCj7bR1eeApGABOZxRNX7J3Av2ha5d8B8o",
@@ -17,9 +18,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-export const auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-});
+// export const auth = initializeAuth(app, {
+//     persistence: getReactNativePersistence(AsyncStorage),
+// });
 
+export const auth = Platform.OS === 'ios' || Platform.OS === 'android' 
+    ? initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage),
+      })
+    : getAuth(app); // Web hari export process ekedi normal auth gannawa
 
 export const db = getFirestore(app);
