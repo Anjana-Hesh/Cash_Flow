@@ -21,8 +21,8 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
       ],
       "package": "com.anjuhesh.CashFlow",
       "versionCode": 2
@@ -40,7 +40,6 @@
           "recordAudioAndroid": true
         }
       ],
-      "expo-router",
       [
         "expo-splash-screen",
         {
@@ -54,7 +53,9 @@
         }
       ],
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-local-authentication",
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true,
