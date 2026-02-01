@@ -1,5 +1,5 @@
 import { Alert, Pressable, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import Typo from '@/components/Typo'
 import { colors } from '@/constants/theme'
@@ -10,6 +10,8 @@ import * as Icons from 'phosphor-react-native'
 import Button from '@/components/Button'
 import { useRouter } from 'expo-router'
 import { login } from '@/service/authService'
+import * as LocalAuthentication from 'expo-local-authentication'
+import * as SecureStore from 'expo-secure-store'
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -18,6 +20,72 @@ const Login = () => {
 
   const router = useRouter()
   // const { signInWithGoogle } = useGoogleAuth();
+
+  useEffect(() => {
+    checkBiometricAvailability();
+  }, []);
+
+  const checkBiometricAvailability = async () => {
+    try {
+      const savedEmail = await SecureStore.getItemAsync('user_email');
+      const savedPassword = await SecureStore.getItemAsync('user_password');
+      const isBiometricEnabled = await SecureStore.getItemAsync('biometric_enabled');
+
+      // If enabled and credentials exist, show prompt
+      if (savedEmail && savedPassword && isBiometricEnabled === 'true') {
+        showBiometricPrompt(savedEmail, savedPassword);
+      }
+    } catch (error: any) {
+      console.log("Biometric check error", error);
+      Alert.alert("Biometrics check error" , error);
+    }
+  };
+
+  const showBiometricPrompt = async (savedEmail: string, savedPassword: string) => {
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Login with Fingerprint',
+        fallbackLabel: 'Use Password',
+      });
+
+      if (result.success) {
+        // Log in using the shared login logic
+        handleLoginLogic(savedEmail, savedPassword);
+      }
+    } catch (error: any) {
+      console.error("Biometric Auth Error:", error);
+      Alert.alert("Biometrics check error" , error);
+    }
+  };
+
+  const onFingerprintPress = async () => {
+    const savedEmail = await SecureStore.getItemAsync('user_email');
+    const savedPassword = await SecureStore.getItemAsync('user_password');
+    const isBiometricEnabled = await SecureStore.getItemAsync('biometric_enabled');
+
+    if (isBiometricEnabled === 'true' && savedEmail && savedPassword) {
+      showBiometricPrompt(savedEmail, savedPassword);
+    } else {
+      Alert.alert("Biometrics", "Please enable Fingerprint from Settings after your first login.");
+    }
+  }
+
+  const handleLoginLogic = async (loginEmail: string, loginPassword: string) => {
+    setIsLoading(true);
+    try {
+      await login(loginEmail, loginPassword);
+      
+      // Save/Update credentials for next time
+      await SecureStore.setItemAsync('user_email', loginEmail);
+      await SecureStore.setItemAsync('user_password', loginPassword);
+
+      router.replace("/home");
+    } catch (error: any) {
+      Alert.alert("Login Failed", error.message || "Invalid credentials");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if(isLoading) return;
@@ -31,6 +99,10 @@ const Login = () => {
 
     try {
       await login(email, password);
+
+      await SecureStore.setItemAsync('user_email', email);
+      await SecureStore.setItemAsync('user_password', password);
+      
       Alert.alert("Login Successful!");
       router.replace("/home")
 
@@ -131,6 +203,14 @@ const Login = () => {
               <Typo fontWeight="700" color="#fff" size={18}> Continue with Google </Typo>
             </View>
           </Button> */}
+
+          <Pressable 
+            onPress={onFingerprintPress} 
+            style={{alignItems: 'center', marginTop: 20}}
+          >
+            <Icons.Fingerprint size={40} color={colors.primary} weight="thin" />
+            <Typo size={12} color={colors.textLighter}>Login with Fingerprint</Typo>
+          </Pressable>
         </View>
 
         {/* Footer */}

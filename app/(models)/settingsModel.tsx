@@ -1,67 +1,113 @@
-import { ScrollView, StyleSheet, TouchableOpacity, View, Switch } from 'react-native'
-import React, { useState } from 'react'
+import { ScrollView, StyleSheet, TouchableOpacity, View, Switch, Alert } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import Header from '@/components/Header'
 import Typo from '@/components/Typo'
-import { colors, radius, spacingX, spacingY } from '@/constants/theme'
+import { colors, radius } from '@/constants/theme'
 import * as Icons from 'phosphor-react-native'
 import { useRouter } from 'expo-router'
 import BackButton from '@/components/BackButton'
 import { logout } from '@/service/authService'
+import * as LocalAuthentication from 'expo-local-authentication'
+import * as SecureStore from 'expo-secure-store'
 
 const Settings = () => {
     const router = useRouter();
-    const [isFaceID, setIsFaceID] = useState(true);
+    const [isFaceID, setIsFaceID] = useState(false);
     const [isNotifications, setIsNotifications] = useState(true);
 
-    // Settings Row Component (Reusable)
+    // Load saved biometric preference when the screen opens
+    useEffect(() => {
+        loadBiometricSettings();
+    }, []);
+
+    const loadBiometricSettings = async () => {
+        const enabled = await SecureStore.getItemAsync('biometric_enabled');
+        setIsFaceID(enabled === 'true');
+    };
+
+    const handleBiometricToggle = async (value: boolean) => {
+        // If user is turning it OFF
+        if (!value) {
+            await SecureStore.setItemAsync('biometric_enabled', 'false');
+            setIsFaceID(false);
+            return;
+        }
+
+        // If user is turning it ON
+        try {
+            const hasHardware = await LocalAuthentication.hasHardwareAsync();
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+            if (!hasHardware || !isEnrolled) {
+                Alert.alert("Error", "Biometrics not available or setup on this device.");
+                return;
+            }
+
+            const result = await LocalAuthentication.authenticateAsync({
+                promptMessage: 'Confirm Biometrics to Enable',
+                fallbackLabel: 'Use Passcode',
+            });
+
+            if (result.success) {
+                // Save the preference securely
+                await SecureStore.setItemAsync('biometric_enabled', 'true');
+                setIsFaceID(true);
+                Alert.alert("Success", "Biometric authentication enabled!");
+            }
+        } catch (error) {
+            console.error("Biometric Error: ", error);
+            Alert.alert("Error", "An unexpected error occurred.");
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            router.replace('/welcome');
+        } catch (error: any) {
+            console.error("Logout Error: ", error.message);
+        }
+    }
+
     const SettingItem = ({ icon: Icon, label, value, onPress, showChevron = true, color = colors.white }: any) => (
         <TouchableOpacity style={styles.row} onPress={onPress}>
-            <View className="flex-row items-center gap-3">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <View style={styles.iconContainer}>
                     <Icon size={22} color={color} weight="fill" />
                 </View>
                 <Typo size={16} color={color}>{label}</Typo>
             </View>
-            <View className="flex-row items-center gap-2">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 {value && <Typo size={14} color={colors.neutral400}>{value}</Typo>}
                 {showChevron && <Icons.CaretRight size={18} color={colors.neutral400} />}
             </View>
         </TouchableOpacity>
     );
 
-    const handleLogout = async () => {
-        try {
-          await logout()
-          router.replace('/welcome');
-        } catch (error: any) {
-          console.error("Logout Error: ", error.message);
-        }
-    }
-
     return (
         <ScreenWrapper>
-            <View className="flex-1 px-5">
+            <View style={{ flex: 1, paddingHorizontal: 20 }}>
                 <Header title="Settings" leftIcon={<BackButton />} />
 
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 50, paddingTop: 20 }}>
                     
-                    {/* Account Section */}
                     <Typo size={14} color={colors.neutral400} style={styles.sectionTitle}>ACCOUNT</Typo>
                     <View style={styles.sectionBox}>
                         <SettingItem icon={Icons.User} label="Profile Details" value="John Doe" />
                         <SettingItem icon={Icons.EnvelopeSimple} label="Email" value="john@example.com" />
                     </View>
 
-                    {/* App Preferences */}
                     <Typo size={14} color={colors.neutral400} style={styles.sectionTitle}>PREFERENCES</Typo>
                     <View style={styles.sectionBox}>
                         <SettingItem icon={Icons.CurrencyDollar} label="Currency" value="LKR (Rs.)" />
                         
                         {/* Notifications Toggle */}
                         <View style={styles.row}>
-                            <View className="flex-row items-center gap-3">
-                                <View style={styles.iconContainer}><Icons.Bell size={22} color={colors.white} weight="fill" /></View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                <View style={styles.iconContainer}>
+                                    <Icons.Bell size={22} color={colors.white} weight="fill" />
+                                </View>
                                 <Typo size={16}>Notifications</Typo>
                             </View>
                             <Switch 
@@ -72,32 +118,28 @@ const Settings = () => {
                         </View>
 
                         {/* Security Toggle */}
-                        <View style={styles.row}>
-                            <View className="flex-row items-center gap-3">
-                                <View style={styles.iconContainer}><Icons.Fingerprint size={22} color={colors.white} weight="fill" /></View>
+                        <View style={[styles.row, { borderBottomWidth: 0 }]}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                <View style={styles.iconContainer}>
+                                    <Icons.Fingerprint size={22} color={colors.white} weight="fill" />
+                                </View>
                                 <Typo size={16}>Face ID / Biometrics</Typo>
                             </View>
                             <Switch 
                                 value={isFaceID} 
-                                onValueChange={setIsFaceID}
+                                onValueChange={handleBiometricToggle}
                                 trackColor={{ false: colors.neutral700, true: colors.primary }}
                             />
                         </View>
                     </View>
 
-                    {/* Support & Legal */}
                     <Typo size={14} color={colors.neutral400} style={styles.sectionTitle}>SUPPORT & LEGAL</Typo>
                     <View style={styles.sectionBox}>
-                        <SettingItem 
-                            icon={Icons.Lock} 
-                            label="Privacy Policy" 
-                            onPress={() => router.push('/privacyPolicy')} 
-                        />
+                        <SettingItem icon={Icons.Lock} label="Privacy Policy" onPress={() => router.push('/privacyPolicy')} />
                         <SettingItem icon={Icons.Info} label="About Us" />
                         <SettingItem icon={Icons.FileText} label="Terms of Service" />
                     </View>
 
-                    {/* Actions */}
                     <Typo size={14} color={colors.neutral400} style={styles.sectionTitle}>ACTIONS</Typo>
                     <View style={styles.sectionBox}>
                         <SettingItem icon={Icons.ArrowSquareOut} label="Export Data (CSV)" />
@@ -106,7 +148,7 @@ const Settings = () => {
                             label="Logout" 
                             color={colors.rose} 
                             showChevron={false} 
-                            onPress={() => {handleLogout()}}
+                            onPress={handleLogout}
                         />
                     </View>
 
@@ -123,7 +165,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginLeft: 5,
         fontWeight: '600',
-        letterSpacing: 1
+        letterSpacing: 1,
+        textTransform: 'uppercase'
     },
     sectionBox: {
         backgroundColor: colors.neutral800,
@@ -147,4 +190,4 @@ const styles = StyleSheet.create({
         padding: 8,
         borderRadius: 10,
     }
-})
+});
